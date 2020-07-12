@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using AngleSharp;
@@ -8,59 +7,15 @@ using YamlDotNet.RepresentationModel;
 
 namespace LingvoGraph
 {
-    struct Input
-    {
-        public string Text;
-        public string Lang;
-
-        public Input(string text, string lang)
-        {
-            Text = text;
-            Lang = lang;
-        }
-    }
-
-    class DataSource
-    {
-        public string Name;
-        public Func<Input, string> Url;
-        public YamlDocument Schema;
-    }
-
-    class DataSources
-    {
-        static YamlDocument LoadYaml(string name)
-        {
-            string cwd = Environment.GetEnvironmentVariable("YAML_DIR");
-            if (string.IsNullOrEmpty(cwd))
-            {
-                cwd = Path.Combine(Environment.CurrentDirectory, "../../");
-            }
-
-            var path = Path.Combine(cwd, name);
-            using var input = new StreamReader(path);
-            var yaml = new YamlStream();
-            yaml.Load(input);
-            return yaml.Documents[0];
-        }
-        
-        public static readonly DataSource Macmillan = new DataSource
-        {
-            Name = "macmillan",
-            Url = t => $"https://www.macmillandictionary.com/dictionary/british/{t.Text}",
-            Schema = LoadYaml("macmillan.yml"),
-        };
-    }
-
-    class Program
+    static class Program
     {
         static async Task Main(string[] args)
         {
             // TODO process all words from stdin
             await Parse(DataSources.Macmillan, new Input("girl", "en"));
         }
-        
-        static async Task Parse(DataSource src, Input input)
+
+        private static async Task Parse(DataSource src, Input input)
         {
             var url = src.Url(input);
             var config = Configuration.Default.WithDefaultLoader();
@@ -129,33 +84,5 @@ namespace LingvoGraph
         }
 
         
-    }
-
-    static class EnumerableExtensions
-    {
-        public static IEnumerable<T> OrEmpty<T>(this IEnumerable<T> seq)
-        {
-            return seq ?? Enumerable.Empty<T>();
-        }
-    }
-
-    static class YamlExt
-    {
-        public static YamlNode Get(this YamlNode node, string key)
-        {
-            try
-            {
-                return node[key];
-            }
-            catch (Exception ignore)
-            {
-                return null;
-            }
-        }
-
-        public static string Strip(this string s)
-        {
-            return (s ?? "").Trim().Trim((char) 8203);
-        }
     }
 }
