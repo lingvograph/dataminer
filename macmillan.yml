@@ -1,0 +1,22 @@
+- selector: .PRON
+  term: transcription
+# tags
+- selector: .PART-OF-SPEECH
+  uniq: true
+  term: tag
+- selector: .SYNTAX-CODING
+  unique: true
+  term: tag
+- selector: .DEFINITION
+  term: definition
+- selector: .EXAMPLES
+  term: in
+- selector: .PHR-XREF
+  term: in
+- selector: .synonyms .theslink
+  exclude: "..."
+  term: synonym
+- selector: .audio_play_button
+  audio:
+    - "@data-src-mp3"
+    - "@data-src-ogg"
